@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { fetchItalianMeals } from "../services/mealsApi";
 import Avatar from "./AvatarScreen";
+import FavoriteButton from "../components/FavoriteButton";
 
 export default function HomeScreen({ navigation, route }: any) {
   const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
@@ -71,7 +72,12 @@ export default function HomeScreen({ navigation, route }: any) {
           onPress={() => navigation.navigate("Details", { id: item.idMeal })}
         >
           <Image source={{ uri: item.strMealThumb }} style={styles.thumb} />
-          <Text style={styles.name}>{item.strMeal}</Text>
+          <View style={styles.row}>
+            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+              {item.strMeal}
+            </Text>
+            <FavoriteButton id={item.idMeal} />
+          </View>
         </TouchableOpacity>
       )}
     />
@@ -85,7 +91,8 @@ const styles = StyleSheet.create({
   btnText: { color: "#fff", fontWeight: "bold" },
   card: { backgroundColor: "#fff", borderRadius: 10, marginBottom: 14, elevation: 2, overflow: "hidden" },
   thumb: { width: "100%", height: 160 },
-  name: { fontSize: 16, fontWeight: "bold", padding: 12 },
+  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, paddingVertical: 8 },
+  name: { fontSize: 16, fontWeight: "bold", flex: 1, marginRight: 8 },
   headerButton: { marginRight: 12, padding: 4 },
   headerButtonText: { fontSize: 20 },
 });

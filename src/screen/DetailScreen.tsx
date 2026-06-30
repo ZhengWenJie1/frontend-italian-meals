@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { fetchMealById } from "../services/mealsApi";
 import HomeScreen from "./HomeScreen";
+import FavoriteButton from "../components/FavoriteButton";
 
 export default function DetailScreen({ route, navigation }: any) {
   const id = route.params?.id;
@@ -45,7 +46,10 @@ export default function DetailScreen({ route, navigation }: any) {
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
       <Image source={{ uri: meal.strMealThumb }} style={styles.image} />
-      <Text style={styles.name}>{meal.strMeal}</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.name}>{meal.strMeal}</Text>
+        <FavoriteButton id={meal.idMeal} />
+      </View>
       <Text style={styles.section}>Istruzioni</Text>
       <Text style={styles.instructions}>{meal.strInstructions}</Text>
       <TouchableOpacity style={styles.btn} onPress={() => navigation.goBack(HomeScreen)}>
@@ -59,7 +63,8 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
   error: { fontSize: 16, color: "red", marginBottom: 16, textAlign: "center" },
   image: { width: "100%", height: 220, borderRadius: 10 },
-  name: { fontSize: 22, fontWeight: "bold", marginTop: 12, marginBottom: 8 },
+  titleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 12 },
+  name: { fontSize: 22, fontWeight: "bold", marginBottom: 8, flex: 1, marginRight: 8 },
   section: { fontSize: 16, fontWeight: "bold", marginTop: 12, marginBottom: 4, color: "#e74c3c" },
   instructions: { fontSize: 14, color: "#444", lineHeight: 22 },
   btn: { backgroundColor: "#e74c3c", padding: 14, borderRadius: 8, alignItems: "center", marginTop: 20 },
