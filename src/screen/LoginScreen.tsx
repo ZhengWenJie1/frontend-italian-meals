@@ -23,7 +23,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     if (formOk) {
       const user = validateLogin(email, password);
       if (user) {
-        navigation.navigate("Home", { user });
+        navigation.replace("Home", { user });
       } else {
         setError("Email o password non validi");
       }

@@ -1,7 +1,8 @@
 import React, {useState} from "react";
-import {Image, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {Image, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { SettingRow } from "../components/SettingRow";
+
 function Avatar({ uri }: { uri: string }) {
   const [failed, setFailed] = React.useState(false);
   return (
@@ -19,12 +20,23 @@ function Avatar({ uri }: { uri: string }) {
   );
 }
 
-export default function AvatarScreen() {
+type AvatarScreenProps = {
+  navigation: any;
+};
+
+export default function AvatarScreen({ navigation }: AvatarScreenProps) {
   const [name, setName] = useState("");
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
  
   const nameTooShort = name.length > 0 && name.length < 2;
+
+  function handleLogout() {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Login" }],
+    });
+  }
  
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F2F2F7" }}>
@@ -67,6 +79,15 @@ export default function AvatarScreen() {
           <Switch value={darkMode} onValueChange={setDarkMode} />
         }
       />
+
+      <SettingRow
+        label="Logout"
+        right={
+          <Pressable style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Log out</Text>
+          </Pressable>
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -89,4 +110,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   buttonText: { fontWeight: "600" },
+  logoutButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "#D63B3B",
+  },
+  logoutText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
 });
