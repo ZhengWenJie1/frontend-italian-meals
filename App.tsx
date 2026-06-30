@@ -4,6 +4,8 @@ import HomeScreen from "./src/screen/HomeScreen";
 import DetailScreen from "./src/screen/DetailScreen";
 import LoginScreen from "./src/screen/LoginScreen";
 import AvatarScreen from "./src/screen/AvatarScreen";
+import { FavoritesProvider } from "./src/context/FavoriteContext";
+
 const Stack = createNativeStackNavigator();
 
 const linking = {
@@ -19,14 +21,15 @@ const linking = {
 
 export default function App() {
   return (
-    <NavigationContainer linking={linking}>
-
-      <Stack.Navigator>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Avatar" component={AvatarScreen} />
-        <Stack.Screen name="Details" component={DetailScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <FavoritesProvider>
+      <NavigationContainer linking={linking}>
+        <Stack.Navigator>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Avatar" component={AvatarScreen} />
+          <Stack.Screen name="Details" component={DetailScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </FavoritesProvider>
   );
 }

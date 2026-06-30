@@ -1,17 +1,29 @@
-import React, { useEffect, useState, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
-  FlatList, Text, TouchableOpacity, View,
-  StyleSheet, ActivityIndicator, Image,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { fetchItalianMeals } from "../services/mealsApi";
-import Avatar from "./AvatarScreen";
 import FavoriteButton from "../components/FavoriteButton";
+import { useFavorites } from "../context/FavoriteContext";
+import { fetchItalianMeals } from "../services/mealsApi";
 
-export default function HomeScreen({ navigation, route }: any) {
+export default function HomeScreen({ navigation }: any) {
   const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
   const [items, setItems] = useState<any[]>([]);
   const [message, setMessage] = useState("");
-  
+  const [viewMode, setViewMode] = useState<"all" | "favorites">("all");
+  const { favoriteIds, isLoading: favoritesLoading } = useFavorites();
+
+  const visibleItems =
+    viewMode === "favorites"
+      ? items.filter((item) => favoriteIds.includes(item.idMeal))
+      : items;
+
   async function loadMeals() {
     setStatus("loading");
     try {
@@ -29,7 +41,9 @@ export default function HomeScreen({ navigation, route }: any) {
     }
   }
 
-  useEffect(() => { loadMeals(); }, []);
+  useEffect(() => {
+    loadMeals();
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -46,8 +60,12 @@ export default function HomeScreen({ navigation, route }: any) {
     });
   }, [navigation]);
 
-  if (status === "loading") {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#e74c3c" /></View>;
+  if (status === "loading" || favoritesLoading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#e74c3c" />
+      </View>
+    );
   }
 
   if (status === "error") {
@@ -62,25 +80,52 @@ export default function HomeScreen({ navigation, route }: any) {
   }
 
   return (
-    <FlatList
-      contentContainerStyle={{ padding: 16 }}
-      data={items}
-      keyExtractor={(item) => item.idMeal}
-      renderItem={({ item }) => (
+    <View style={{ flex: 1 }}>
+      <View style={styles.filterRow}>
         <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("Details", { id: item.idMeal })}
+          style={[styles.filterBtn, viewMode === "all" && styles.filterBtnActive]}
+          onPress={() => setViewMode("all")}
         >
-          <Image source={{ uri: item.strMealThumb }} style={styles.thumb} />
-          <View style={styles.row}>
-            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
-              {item.strMeal}
-            </Text>
-            <FavoriteButton id={item.idMeal} />
-          </View>
+          <Text style={[styles.filterText, viewMode === "all" && styles.filterTextActive]}>
+            Lista completa
+          </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterBtn, viewMode === "favorites" && styles.filterBtnActive]}
+          onPress={() => setViewMode("favorites")}
+        >
+          <Text style={[styles.filterText, viewMode === "favorites" && styles.filterTextActive]}>
+            Solo preferiti
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {viewMode === "favorites" && visibleItems.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>Nessun preferito ancora.</Text>
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={{ padding: 16 }}
+          data={visibleItems}
+          keyExtractor={(item) => item.idMeal}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate("Details", { id: item.idMeal })}
+            >
+              <Image source={{ uri: item.strMealThumb }} style={styles.thumb} />
+              <View style={styles.row}>
+                <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+                  {item.strMeal}
+                </Text>
+                <FavoriteButton id={item.idMeal} />
+              </View>
+            </TouchableOpacity>
+          )}
+        />
       )}
-    />
+    </View>
   );
 }
 
@@ -95,4 +140,11 @@ const styles = StyleSheet.create({
   name: { fontSize: 16, fontWeight: "bold", flex: 1, marginRight: 8 },
   headerButton: { marginRight: 12, padding: 4 },
   headerButtonText: { fontSize: 20 },
+  filterRow: { flexDirection: "row", paddingHorizontal: 16, paddingTop: 12, gap: 8 },
+  filterBtn: { flex: 1, borderRadius: 999, borderWidth: 1, borderColor: "#e74c3c", paddingVertical: 10, alignItems: "center" },
+  filterBtnActive: { backgroundColor: "#e74c3c" },
+  filterText: { color: "#e74c3c", fontWeight: "600" },
+  filterTextActive: { color: "#fff" },
+  emptyState: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 },
+  emptyText: { color: "#666", textAlign: "center" },
 });
