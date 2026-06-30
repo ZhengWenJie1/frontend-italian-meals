@@ -4,6 +4,7 @@ import {
   ActivityIndicator, Image, ScrollView,
 } from "react-native";
 import { fetchMealById } from "../services/mealsApi";
+import HomeScreen from "./HomeScreen";
 
 export default function DetailScreen({ route, navigation }: any) {
   const id = route.params?.id;
@@ -47,7 +48,7 @@ export default function DetailScreen({ route, navigation }: any) {
       <Text style={styles.name}>{meal.strMeal}</Text>
       <Text style={styles.section}>Istruzioni</Text>
       <Text style={styles.instructions}>{meal.strInstructions}</Text>
-      <TouchableOpacity style={styles.btn} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.btn} onPress={() => navigation.goBack(HomeScreen)}>
         <Text style={styles.btnText}>← Torna indietro</Text>
       </TouchableOpacity>
     </ScrollView>

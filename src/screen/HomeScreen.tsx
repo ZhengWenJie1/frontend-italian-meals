@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import {
   FlatList, Text, TouchableOpacity, View,
   StyleSheet, ActivityIndicator, Image,
 } from "react-native";
 import { fetchItalianMeals } from "../services/mealsApi";
+import Avatar from "./AvatarScreen";
 
-export default function HomeScreen({ navigation }: any) {
+export default function HomeScreen({ navigation, route }: any) {
   const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
   const [items, setItems] = useState<any[]>([]);
   const [message, setMessage] = useState("");
-
+  
   async function loadMeals() {
     setStatus("loading");
     try {
@@ -28,6 +29,21 @@ export default function HomeScreen({ navigation }: any) {
   }
 
   useEffect(() => { loadMeals(); }, []);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Italian Meals",
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Avatar")}
+          style={styles.headerButton}
+          accessibilityLabel="Vai al profilo"
+        >
+          <Text style={styles.headerButtonText}>👤</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   if (status === "loading") {
     return <View style={styles.center}><ActivityIndicator size="large" color="#e74c3c" /></View>;
@@ -70,4 +86,6 @@ const styles = StyleSheet.create({
   card: { backgroundColor: "#fff", borderRadius: 10, marginBottom: 14, elevation: 2, overflow: "hidden" },
   thumb: { width: "100%", height: 160 },
   name: { fontSize: 16, fontWeight: "bold", padding: 12 },
+  headerButton: { marginRight: 12, padding: 4 },
+  headerButtonText: { fontSize: 20 },
 });
