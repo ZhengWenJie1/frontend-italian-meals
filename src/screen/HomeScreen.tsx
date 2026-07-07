@@ -11,13 +11,15 @@ import {
 import FavoriteButton from "../components/FavoriteButton";
 import { useFavorites } from "../context/FavoriteContext";
 import { fetchItalianMeals } from "../services/mealsApi";
+import { getThemeColors } from "../theme/colors";
 
-export default function HomeScreen({ navigation }: any) {
+export default function HomeScreen({ navigation, isDarkMode = false }: any) {
   const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
   const [items, setItems] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [viewMode, setViewMode] = useState<"all" | "favorites">("all");
   const { favoriteIds, isLoading: favoritesLoading } = useFavorites();
+  const colors = getThemeColors(isDarkMode);
 
   const visibleItems =
     viewMode === "favorites"
@@ -62,17 +64,17 @@ export default function HomeScreen({ navigation }: any) {
 
   if (status === "loading" || favoritesLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#e74c3c" />
+      <View style={[styles.center, { backgroundColor: colors.background }]}> 
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (status === "error") {
     return (
-      <View style={styles.center}>
-        <Text style={styles.error}>{message}</Text>
-        <TouchableOpacity style={styles.btn} onPress={loadMeals}>
+      <View style={[styles.center, { backgroundColor: colors.background }]}> 
+        <Text style={[styles.error, { color: colors.danger }]}>{message}</Text>
+        <TouchableOpacity style={[styles.btn, { backgroundColor: colors.danger }]} onPress={loadMeals}>
           <Text style={styles.btnText}>Riprova</Text>
         </TouchableOpacity>
       </View>
@@ -80,29 +82,37 @@ export default function HomeScreen({ navigation }: any) {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.filterRow}>
         <TouchableOpacity
-          style={[styles.filterBtn, viewMode === "all" && styles.filterBtnActive]}
+          style={[
+            styles.filterBtn,
+            { borderColor: colors.danger },
+            viewMode === "all" && [styles.filterBtnActive, { backgroundColor: colors.danger }],
+          ]}
           onPress={() => setViewMode("all")}
         >
-          <Text style={[styles.filterText, viewMode === "all" && styles.filterTextActive]}>
+          <Text style={[styles.filterText, { color: colors.danger }, viewMode === "all" && [styles.filterTextActive, { color: colors.surface }] ]}>
             Lista completa
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.filterBtn, viewMode === "favorites" && styles.filterBtnActive]}
+          style={[
+            styles.filterBtn,
+            { borderColor: colors.danger },
+            viewMode === "favorites" && [styles.filterBtnActive, { backgroundColor: colors.danger }],
+          ]}
           onPress={() => setViewMode("favorites")}
         >
-          <Text style={[styles.filterText, viewMode === "favorites" && styles.filterTextActive]}>
+          <Text style={[styles.filterText, { color: colors.danger }, viewMode === "favorites" && [styles.filterTextActive, { color: colors.surface }] ]}>
             Solo preferiti
           </Text>
         </TouchableOpacity>
       </View>
 
       {viewMode === "favorites" && visibleItems.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>Nessun preferito ancora.</Text>
+        <View style={[styles.emptyState, { backgroundColor: colors.background }]}> 
+          <Text style={[styles.emptyText, { color: colors.mutedText }]}>Nessun preferito ancora.</Text>
         </View>
       ) : (
         <FlatList
@@ -111,12 +121,12 @@ export default function HomeScreen({ navigation }: any) {
           keyExtractor={(item) => item.idMeal}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={styles.card}
+              style={[styles.card, { backgroundColor: colors.surface }]}
               onPress={() => navigation.navigate("Details", { id: item.idMeal })}
             >
               <Image source={{ uri: item.strMealThumb }} style={styles.thumb} />
               <View style={styles.row}>
-                <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+                <Text style={[styles.name, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
                   {item.strMeal}
                 </Text>
                 <FavoriteButton id={item.idMeal} />
@@ -131,10 +141,10 @@ export default function HomeScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
-  error: { fontSize: 16, color: "red", marginBottom: 16, textAlign: "center" },
-  btn: { backgroundColor: "#e74c3c", padding: 14, borderRadius: 8 },
+  error: { fontSize: 16, marginBottom: 16, textAlign: "center" },
+  btn: { padding: 14, borderRadius: 8 },
   btnText: { color: "#fff", fontWeight: "bold" },
-  card: { backgroundColor: "#fff", borderRadius: 10, marginBottom: 14, elevation: 2, overflow: "hidden" },
+  card: { borderRadius: 10, marginBottom: 14, elevation: 2, overflow: "hidden" },
   thumb: { width: "100%", height: 160 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, paddingVertical: 8 },
   name: { fontSize: 16, fontWeight: "bold", flex: 1, marginRight: 8 },
@@ -146,5 +156,5 @@ const styles = StyleSheet.create({
   filterText: { color: "#e74c3c", fontWeight: "600" },
   filterTextActive: { color: "#fff" },
   emptyState: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 },
-  emptyText: { color: "#666", textAlign: "center" },
+  emptyText: { textAlign: "center" },
 });

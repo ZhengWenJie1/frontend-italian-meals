@@ -1,7 +1,9 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Image, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SettingRow } from "../components/SettingRow";
+import { loadThemeMode, saveThemeMode } from "../services/storage";
+import { getThemeColors } from "../theme/colors";
 
 function Avatar({ uri }: { uri: string }) {
   const [failed, setFailed] = React.useState(false);
@@ -22,14 +24,26 @@ function Avatar({ uri }: { uri: string }) {
 
 type AvatarScreenProps = {
   navigation: any;
+  isDarkMode?: boolean;
+  setIsDarkMode?: (value: boolean) => void;
 };
 
-export default function AvatarScreen({ navigation }: AvatarScreenProps) {
+export default function AvatarScreen({ navigation, isDarkMode = false, setIsDarkMode }: AvatarScreenProps) {
   const [name, setName] = useState("");
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
- 
+  const [darkMode, setDarkMode] = useState(isDarkMode);
+
+  useEffect(() => {
+    setDarkMode(isDarkMode);
+  }, [isDarkMode]);
+
+  const colors = getThemeColors(darkMode);
   const nameTooShort = name.length > 0 && name.length < 2;
+
+  function toggleTheme(value: boolean) {
+    setDarkMode(value);
+    setIsDarkMode?.(value);
+  }
 
   function handleLogout() {
     navigation.reset({
@@ -37,53 +51,78 @@ export default function AvatarScreen({ navigation }: AvatarScreenProps) {
       routes: [{ name: "Login" }],
     });
   }
- 
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F2F2F7" }}>
-      <Text style={{ fontSize: 28, fontWeight: "700", padding: 16 }}>Profilo</Text>
- 
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}> 
+      <Text style={[styles.title, { color: colors.text }]}>Profilo</Text>
+
       <SettingRow
         label="Name"
+        backgroundColor={colors.surface}
+        borderColor={colors.border}
+        labelColor={colors.text}
         right={
           <TextInput
             value={name}
             onChangeText={setName}
             placeholder="Your name"
+            placeholderTextColor={colors.mutedText}
             style={{
               borderWidth: 1,
-              borderColor: nameTooShort ? "red" : "#ccc",
+              borderColor: nameTooShort ? colors.danger : colors.inputBorder,
               borderRadius: 8,
               padding: 6,
               width: 140,
               textAlign: "right",
+              backgroundColor: colors.surface,
+              color: colors.text,
             }}
           />
         }
       />
       {nameTooShort && (
-        <Text style={{ color: "red", fontSize: 12, paddingHorizontal: 16 }}>
+        <Text style={{ color: colors.danger, fontSize: 12, paddingHorizontal: 16 }}>
           Name is too short
         </Text>
       )}
- 
+
       <SettingRow
         label="Notifications"
+        backgroundColor={colors.surface}
+        borderColor={colors.border}
+        labelColor={colors.text}
         right={
-          <Switch value={notifications} onValueChange={setNotifications} />
+          <Switch
+            value={notifications}
+            onValueChange={setNotifications}
+            thumbColor={notifications ? colors.primary : "#f4f3f4"}
+            trackColor={{ false: "#767577", true: colors.primary }}
+          />
         }
       />
- 
+
       <SettingRow
         label="Dark mode"
+        backgroundColor={colors.surface}
+        borderColor={colors.border}
+        labelColor={colors.text}
         right={
-          <Switch value={darkMode} onValueChange={setDarkMode} />
+          <Switch
+            value={darkMode}
+            onValueChange={toggleTheme}
+            thumbColor={darkMode ? colors.primary : "#f4f3f4"}
+            trackColor={{ false: "#767577", true: colors.primary }}
+          />
         }
       />
 
       <SettingRow
         label="Logout"
+        backgroundColor={colors.surface}
+        borderColor={colors.border}
+        labelColor={colors.text}
         right={
-          <Pressable style={styles.logoutButton} onPress={handleLogout}>
+          <Pressable style={[styles.logoutButton, { backgroundColor: colors.danger }]} onPress={handleLogout}>
             <Text style={styles.logoutText}>Log out</Text>
           </Pressable>
         }
@@ -93,7 +132,8 @@ export default function AvatarScreen({ navigation }: AvatarScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 20, fontWeight: "600" },
+  safeArea: { flex: 1 },
+  title: { fontSize: 28, fontWeight: "700", padding: 16 },
   avatarWrap: {
     width: 64,
     height: 64,
@@ -114,7 +154,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-    backgroundColor: "#D63B3B",
   },
   logoutText: {
     color: "#fff",

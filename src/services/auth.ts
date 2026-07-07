@@ -1,5 +1,5 @@
 // services/auth.ts
-export const MOCK_USERS = [
+export const Auth_USERS = [
   {
     email: "mario.rossi@student.it",
     password: "React2026!",
@@ -21,7 +21,7 @@ export const MOCK_USERS = [
 ];
 
 export function validateLogin(email: string, password: string) {
-  return MOCK_USERS.find(
+  return Auth_USERS.find(
     (u) => u.email === email.trim() && u.password === password,
   );
 }
