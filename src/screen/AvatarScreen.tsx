@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Image, Pressable, StyleSheet, Switch, Text, TextInput, View, Alert } from "react-native";
+import {Image, Linking, Pressable, StyleSheet, Switch, Text, TextInput, View, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SettingRow } from "../components/SettingRow";
 import { loadThemeMode, saveThemeMode } from "../services/storage";
@@ -85,6 +85,12 @@ export default function AvatarScreen({ navigation, isDarkMode = false, setIsDark
     }
   }
 
+  function openLocationSettings() {
+    Linking.openSettings().catch(() => {
+      Alert.alert("Errore", "Impossibile aprire le impostazioni del dispositivo.");
+    });
+  }
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}> 
       <Text style={[styles.title, { color: colors.text }]}>Profilo</Text>
@@ -121,12 +127,20 @@ export default function AvatarScreen({ navigation, isDarkMode = false, setIsDark
         labelColor={colors.text}
         right={
           <View style={{ alignItems: "flex-end" }}>
-            <Pressable
-              style={[styles.button, { borderColor: colors.border, backgroundColor: colors.surface }]}
-              onPress={selectLocation}
-            >
-              <Text style={[styles.buttonText, { color: colors.text }]}>{locLoading ? "Selezionando..." : "Richiedi posizione"}</Text>
-            </Pressable>
+            <View style={styles.locationButtonRow}>
+              <Pressable
+                style={[styles.button, { borderColor: colors.border, backgroundColor: colors.surface, marginRight: 8 }]}
+                onPress={selectLocation}
+              >
+                <Text style={[styles.buttonText, { color: colors.text }]}>{locLoading ? "Selezionando..." : "Richiedi posizione"}</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.button, { borderColor: colors.border, backgroundColor: colors.surface }]}
+                onPress={openLocationSettings}
+              >
+                <Text style={[styles.buttonText, { color: colors.text }]}>Impostazioni</Text>
+              </Pressable>
+            </View>
             {location && (
               <Text style={{ marginTop: 6, color: colors.mutedText }}>
                 {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
@@ -247,6 +261,10 @@ const styles = StyleSheet.create({
   segmentButton: {
     paddingVertical: 6,
     paddingHorizontal: 10,
+  },
+  locationButtonRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   segmentButtonActive: {
     backgroundColor: "#e74c3c",
