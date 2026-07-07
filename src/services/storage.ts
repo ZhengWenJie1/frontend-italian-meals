@@ -2,6 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const FAVORITES_KEY = "app:v1:favs";
 export const THEME_KEY = "app:v1:theme";
+export const LAYOUT_KEY = "app:v1:layout";
+
+export type LayoutPreference = "list" | "grid";
 
 export async function loadFavoriteIds(): Promise<string[]> {
   try {
@@ -36,6 +39,23 @@ export async function loadThemeMode(): Promise<boolean> {
 export async function saveThemeMode(isDark: boolean): Promise<void> {
   try {
     await AsyncStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+  } catch {
+
+  }
+}
+
+export async function loadLayoutPreference(): Promise<LayoutPreference> {
+  try {
+    const raw = await AsyncStorage.getItem(LAYOUT_KEY);
+    return raw === "grid" ? "grid" : "list";
+  } catch {
+    return "list";
+  }
+}
+
+export async function saveLayoutPreference(layout: LayoutPreference): Promise<void> {
+  try {
+    await AsyncStorage.setItem(LAYOUT_KEY, layout);
   } catch {
 
   }

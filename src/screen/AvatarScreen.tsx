@@ -26,16 +26,23 @@ type AvatarScreenProps = {
   navigation: any;
   isDarkMode?: boolean;
   setIsDarkMode?: (value: boolean) => void;
+  layoutPreference?: "list" | "grid";
+  setLayoutPreference?: (value: "list" | "grid") => void;
 };
 
-export default function AvatarScreen({ navigation, isDarkMode = false, setIsDarkMode }: AvatarScreenProps) {
+export default function AvatarScreen({ navigation, isDarkMode = false, setIsDarkMode, layoutPreference = "list", setLayoutPreference }: AvatarScreenProps) {
   const [name, setName] = useState("");
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(isDarkMode);
+  const [layoutMode, setLayoutMode] = useState(layoutPreference);
 
   useEffect(() => {
     setDarkMode(isDarkMode);
   }, [isDarkMode]);
+
+  useEffect(() => {
+    setLayoutMode(layoutPreference);
+  }, [layoutPreference]);
 
   const colors = getThemeColors(darkMode);
   const nameTooShort = name.length > 0 && name.length < 2;
@@ -43,6 +50,11 @@ export default function AvatarScreen({ navigation, isDarkMode = false, setIsDark
   function toggleTheme(value: boolean) {
     setDarkMode(value);
     setIsDarkMode?.(value);
+  }
+
+  function toggleLayout(value: "list" | "grid") {
+    setLayoutMode(value);
+    setLayoutPreference?.(value);
   }
 
   function handleLogout() {
@@ -117,6 +129,29 @@ export default function AvatarScreen({ navigation, isDarkMode = false, setIsDark
       />
 
       <SettingRow
+        label="Layout"
+        backgroundColor={colors.surface}
+        borderColor={colors.border}
+        labelColor={colors.text}
+        right={
+          <View style={styles.segmentedControl}>
+            <Pressable
+              style={[styles.segmentButton, layoutMode === "list" && [styles.segmentButtonActive, { backgroundColor: colors.primary }]]}
+              onPress={() => toggleLayout("list")}
+            >
+              <Text style={[styles.segmentText, layoutMode === "list" && { color: colors.surface }]}>Lista</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.segmentButton, layoutMode === "grid" && [styles.segmentButtonActive, { backgroundColor: colors.primary }]]}
+              onPress={() => toggleLayout("grid")}
+            >
+              <Text style={[styles.segmentText, layoutMode === "grid" && { color: colors.surface }]}>Griglia</Text>
+            </Pressable>
+          </View>
+        }
+      />
+
+      <SettingRow
         label="Logout"
         backgroundColor={colors.surface}
         borderColor={colors.border}
@@ -157,6 +192,24 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: "#fff",
+    fontWeight: "600",
+  },
+  segmentedControl: {
+    flexDirection: "row",
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#d0d7de",
+    overflow: "hidden",
+  },
+  segmentButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  segmentButtonActive: {
+    backgroundColor: "#e74c3c",
+  },
+  segmentText: {
+    fontSize: 13,
     fontWeight: "600",
   },
 });

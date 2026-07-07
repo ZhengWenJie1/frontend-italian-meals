@@ -34,3 +34,10 @@ export const darkTheme: AppTheme = {
 export function getThemeColors(isDark: boolean): AppTheme {
   return isDark ? darkTheme : lightTheme;
 }
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+};
