@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from "react";
-import {Image, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import {Image, Pressable, StyleSheet, Switch, Text, TextInput, View, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SettingRow } from "../components/SettingRow";
 import { loadThemeMode, saveThemeMode } from "../services/storage";
 import { getThemeColors } from "../theme/colors";
+import * as Location from "expo-location";
 
 function Avatar({ uri }: { uri: string }) {
   const [failed, setFailed] = React.useState(false);
@@ -35,6 +36,8 @@ export default function AvatarScreen({ navigation, isDarkMode = false, setIsDark
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(isDarkMode);
   const [layoutMode, setLayoutMode] = useState(layoutPreference);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locLoading, setLocLoading] = useState(false);
 
   useEffect(() => {
     setDarkMode(isDarkMode);
@@ -64,6 +67,24 @@ export default function AvatarScreen({ navigation, isDarkMode = false, setIsDark
     });
   }
 
+  async function selectLocation() {
+    try {
+      setLocLoading(true);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permessi posizione negati", "Abilita la posizione nelle impostazioni per usare questa funzione.");
+        setLocLoading(false);
+        return;
+      }
+      const pos = await Location.getCurrentPositionAsync({});
+      setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+    } catch (e: any) {
+      Alert.alert("Errore", e.message ?? "Impossibile ottenere la posizione");
+    } finally {
+      setLocLoading(false);
+    }
+  }
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}> 
       <Text style={[styles.title, { color: colors.text }]}>Profilo</Text>
@@ -90,6 +111,28 @@ export default function AvatarScreen({ navigation, isDarkMode = false, setIsDark
               color: colors.text,
             }}
           />
+        }
+      />
+
+      <SettingRow
+        label="Posizione"
+        backgroundColor={colors.surface}
+        borderColor={colors.border}
+        labelColor={colors.text}
+        right={
+          <View style={{ alignItems: "flex-end" }}>
+            <Pressable
+              style={[styles.button, { borderColor: colors.border, backgroundColor: colors.surface }]}
+              onPress={selectLocation}
+            >
+              <Text style={[styles.buttonText, { color: colors.text }]}>{locLoading ? "Selezionando..." : "Richiedi posizione"}</Text>
+            </Pressable>
+            {location && (
+              <Text style={{ marginTop: 6, color: colors.mutedText }}>
+                {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+              </Text>
+            )}
+          </View>
         }
       />
       {nameTooShort && (
