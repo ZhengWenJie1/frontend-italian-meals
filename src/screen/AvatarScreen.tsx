@@ -11,11 +11,12 @@ function Avatar({ uri }: { uri: string }) {
   return (
     <View style={styles.avatarWrap}>
       {failed ? (
-        <Text style={{ textAlign: "center", lineHeight: 64 }}>?</Text>
+        <Text style={styles.avatarFallback}>?</Text>
       ) : (
         <Image
           source={{ uri }}
-          style={{ width: 64, height: 64 }}
+          style={styles.avatarImage}
+          resizeMode="cover"
           onError={() => setFailed(true)}
         />
       )}
@@ -93,7 +94,10 @@ export default function AvatarScreen({ navigation, isDarkMode = false, setIsDark
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}> 
-      <Text style={[styles.title, { color: colors.text }]}>Profilo</Text>
+      <View style={styles.profileHeader}>
+        <Avatar uri="https://picsum.photos/seed/mario-rossi/128" />
+        <Text style={[styles.title, { color: colors.text }]}>Profilo</Text>
+      </View>
 
       <SettingRow
         label="Name"
@@ -225,13 +229,34 @@ export default function AvatarScreen({ navigation, isDarkMode = false, setIsDark
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  title: { fontSize: 28, fontWeight: "700", padding: 16 },
+  profileHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  title: { fontSize: 28, fontWeight: "700", paddingLeft: 12 },
   avatarWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     overflow: "hidden",
-    borderWidth: 1,
+    borderWidth: 2,
+    borderColor: "#d0d7de",
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarImage: {
+    width: 72,
+    height: 72,
+  },
+  avatarFallback: {
+    textAlign: "center",
+    lineHeight: 72,
+    fontSize: 28,
+    fontWeight: "700",
   },
   button: {
     alignSelf: "flex-start",

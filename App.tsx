@@ -8,11 +8,11 @@ import AvatarScreen from "./src/screen/AvatarScreen";
 import { FavoritesProvider } from "./src/context/FavoriteContext";
 import { loadLayoutPreference, loadThemeMode, saveLayoutPreference, saveThemeMode } from "./src/services/storage";
 import { getThemeColors } from "./src/theme/colors";
-
+import * as Linking from "expo-linking";
 const Stack = createNativeStackNavigator();
 
 const linking = {
-  prefixes: ["myapp://"],
+  prefixes: [Linking.createURL("/"), "myapp://"],
   config: {
     screens: {
       Home: "home",
